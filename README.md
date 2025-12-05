@@ -11,7 +11,7 @@ startup.
 
 ## Remote Port Forwarding
 
-For Remote port forwarding, edit the service template at
+For remote port forwarding, edit the service template at
 [ssh-remote-port-forward-DESC.service](ssh-remote-port-forward-DESC.service):
 
 * Replace `<USER>` and `<GROUP>` with the user and group of who you want to run
@@ -66,9 +66,12 @@ sudo netstat -tulpn
 
 If you don't enable the service, it won’t start up automatically on boot up!
 
+## SSHD
+
 Sometimes a higher <REMOTE_PORT> number may be required because of permission
 issues; sometimes you can’t bind to a lower port <= `1024` unless you are
 `root`.
+
 
 If an ISP blocks a specific port on a server (like port `22`), then make sshd
 listen to multiple ports. In `/etc/ssh/sshd_config` add:
@@ -93,6 +96,67 @@ Then, reload everything:
 ```
 systemctl daemon-reload
 systemctl restart ssh-remote-port-forward-DESC.service
+```
+
+## Setting up SSHD on Linux (Omarchy)
+
+Omarchy by default doesn't have sshd running and enabled.
+
+To enable and start it, do
+
+```
+sudo systemctl enable sshd
+sudo systemctl start sshd
+sudo systemctl status sshd
+```
+
+To test that it works, SSH into localhost:
+
+```
+ssh localhost
+```
+
+Make sure to turn off password authentication in `/etc/ssh/sshd_config`, or else
+remote hackers will crack your simple login password!:
+```
+PasswordAuthentication no
+```
+ (You can also set `X11Forwarding=yes` if you want.)
+
+
+Then, restart sshd:
+```
+sudo systemctl restart sshd
+```
+
+Now, `ssh localhost` should fail due to your public key being denied. So, copy
+your public key:
+```
+cat ~/.ssh/id_ed25519.pub
+```
+and insert that into `~/.ssh/authorized_keys` (create that file, as it likely
+won't exist).
+```
+vim ~/.ssh/authorized_keys
+```
+
+`ssh localhost` should now work, and if your remote port forward is running,
+you can try it out:
+```
+ssh <REMOTE_MACHINE> -p <REMOTE_PORT>
+```
+
+## Firewalls
+
+Since our remote port forward service does an outbound SSH connection, it should
+already be allowed by firewalls by default. So firewalls should not need to be
+touched to allow remote port forwarding!
+
+However, if you want to be able to SSH into your local machine from another
+machine within the local network, here is how to allow it in Linux with `ufw`:
+```
+sudo ufw allow tcp/22
+sudo ufw status
 ```
 
 --------------------------------------------------------------------------------
