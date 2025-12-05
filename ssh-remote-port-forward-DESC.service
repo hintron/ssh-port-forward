@@ -1,0 +1,15 @@
+[Unit]
+Description=Port forward from <REMOTE_SERVER> port <REMOTE_PORT> to this machine (localhost) port <LOCAL_PORT>
+After=network.target
+
+[Service]
+Type=simple
+User=<USER>
+Group=<GROUP>
+ExecStart=/usr/bin/ssh <REMOTE_USER>@<REMOTE_SERVER> -p 22 -vvv -N -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R *:<REMOTE_PORT>:localhost:<LOCAL_PORT>
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+
