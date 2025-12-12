@@ -179,8 +179,18 @@ at `example.com` port `80`. Do this by SSHing into `example.com` as `user1`."
 `-R`: Remote port forward. The source/destination syntax is:
 
 ```
-[who to let connect]:[remote port]:[who to tunnel to]:[local port to map to remote port]
+[A: who to let connect to remote machine]:[remote port]:[B: who to tunnel to from the perspective of the SSHing local machine]:[that machine's port]
 ```
+
+B is usually `localhost`, since usually you want to port forward local services.
+However, B could be another machine on the local network, and the SSHing local
+machine would just be acting as a relay.
+
+A way to remember this is that since we expose a server on a remote port, we are
+the ones listening for connections. Once we get that incoming connection, the
+SSHing machine can pass that on to whoever else it wants. The SSHing machine
+doesn't bind to any port on the local side - it just relays to a machine:port
+combo.
 
 With `example.com`'s SSH server set to have `GatewayPorts=clientspecified`, that
 means that our command can set `\*` to mean anyone can connect to public port
